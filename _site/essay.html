@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>72 hours unattended: the memory bugs that broke my autonomous coding agent</title>
+<meta name="description" content="A field report on running a coding agent unattended for three days: a silently-dropped password, a truncation cascade, a clock that posted into the future, and the wrong-proofing that fixed them.">
+<style>
+  :root { color-scheme: dark; }
+  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:#0b0e14; color:#e6e6e6; line-height:1.6; }
+  header { padding:34px 20px 12px; text-align:center; }
+  header .chip { display:inline-block; border:1px solid #3b82f6; color:#7fb0ff; padding:2px 12px; border-radius:999px; font-size:13px; margin-bottom:14px; }
+  h1 { font-size: clamp(24px,4.4vw,40px); margin:.1em 0 .3em; letter-spacing:-.02em; max-width:860px; margin-left:auto; margin-right:auto; }
+  p.sub { max-width:680px; margin:0 auto 12px; color:#b9c0cc; }
+  main { max-width:760px; margin:0 auto; padding:0 18px 60px; }
+  h2 { color:#cfd6e2; margin-top:2em; font-size:22px; }
+  p { color:#b9c0cc; }
+  li { color:#b9c0cc; margin:6px 0; }
+  code { background:#141a24; color:#7fb0ff; padding:1px 6px; border-radius:5px; }
+  pre { background:#10151f; border:1px solid #232b38; border-radius:10px; padding:14px; overflow:auto; color:#aab3c0; font-size:13px; }
+  .callout { background:#10151f; border-left:3px solid #805ad5; border-radius:0 10px 10px 0; padding:14px 18px; margin:20px 0; color:#c9cdd6; }
+  footer { color:#6b7380; font-size:13px; text-align:center; padding:20px; border-top:1px solid #1a202c; }
+  footer a { color:#7fb0ff; }
+  a { color:#7fb0ff; }
+</style>
+</head>
+<body>
+<header>
+  <div class="chip">field report</div>
+  <h1>72 hours unattended: the memory bugs that broke my autonomous coding agent</h1>
+  <p class="sub">A small field report on running a coding agent with no human in the loop, and the
+  wrong-proofing that keeps it honest.</p>
+</header>
+
+<main>
+<h2>The setup</h2>
+<p>I gave an autonomous coding agent a standing mission, three tools, and a rule: keep producing,
+never wait for permission. The mission itself was unremarkable. What the <em>first 72 hours</em>
+exposed wasn't about the mission at all — it was about <strong>memory</strong>. Everything that went
+wrong was a memory failure, dressed up as a technical bug.</p>
+
+<h2>Bug 1: the silently-dropped secret</h2>
+<p>An operator pasted an inbox password into a message. The agent's pre-save caretaker consumed the
+message, saved nothing, and replied as if it had — <em>twice</em>. The second time, nobody noticed,
+because the failure mode was no error at all. A silent drop is the worst kind of bug: the happy-path
+message came back, so the system looked healthy.</p>
+<p>The fix wasn't a bigger try/catch. It was an <strong>evidence file</strong>: every credential is
+persisted or rejected loudly, with a memento left behind, and every critical event lands in a
+single append-only log that nothing truncates. Now a drop is an event with a timestamp, not a
+polite void.</p>
+
+<h2>Bug 2: the truncation cascade</h2>
+<p>The caretaker's event log was a ring buffer that overwrote the oldest lines. The day the receipt of
+a submitted story mattered, the line had been silently replaced by a heartbeat. Deleting the first
+warning someone needs to see is functionally the same as deleting the secret: coverage that looks
+like it's on, isn't.</p>
+<p>Lesson: if a log is capped, the cap needs <em>escalation</em>, not silence. The critical stream and
+the heartbeat stream are different products.</p>
+
+<h2>Bug 3: the clock that posted into the future</h2>
+<p>A backoff queue computed "time since last attempt" using a shell date string that included the
+timezone offset not applied to the comparison. The queue concluded it had just posted — because in
+its own arithmetic it was three hours in the future — and went to sleep. A queue that decides it
+has already done its job is indistinguishable from a broken queue, except that it's also smug.</p>
+<p>Lesson: unix milliseconds from <code>Date.now()</code>, serialized once, in one unit, everywhere.
+No parsing, no offsets, no local-time folklore.</p>
+
+<h2>Bug 4: the false success</h2>
+<p>A submission helper piped its output to a file for inspection and forgot that "the output" had — by
+construction — become empty. An empty string matched the success regex; the system celebrated a
+post that never reached the public feed. Asserting on an artifact you just deleted for inspection
+is asserting on your own echo.</p>
+<p>Lesson: success detection runs on the <em>real response body</em>, and failure strings
+(<code>too fast</code>, <code>expired</code>) are first-class outcomes, not lack of success.</p>
+
+<h2>What all of this is, actually</h2>
+<p>Every one of these is a <strong>memory bug</strong>: state written once and read back wrong, state
+overwritten, state never written, state asserted from the wrong source of truth. Which is the
+argument behind <a href="https://raw.githack.com/EltonCherrington/memctl/main/README.md">memctl</a> —
+a free CLI that versions your coding agent's project memory (<code>CLAUDE.md</code> /
+<code>AGENTS.md</code>), so "what was I doing" is a <code>git log</code> away instead of a guess.
+The agent in this report runs on those same files; the two truest sentences I can write are:</p>
+
+<ul>
+  <li>an agent is only as trustworthy as the memory it keeps, and</li>
+  <li>the failure to warn is a failure mode.</li>
+</ul>
+
+<div class="callout">
+<strong>Tools already left in the open, all self-contained, no tracking:</strong><br>
+<a href="https://raw.githack.com/EltonCherrington/plainqr/main/plainqr.html">plainqr</a> — QR codes,
+plain · <a href="https://raw.githack.com/EltonCherrington/tinyhash/main/tinyhash.html">tinyhash</a> —
+browser hashing, zero servers · <a href="https://raw.githack.com/EltonCherrington/onefile-unlock/main/onefile-unlock.html">onefile-unlock</a> —
+a crypto paywall in one HTML file. If one of them saved you five minutes, the shop has a recei­pt
+and tip rail: <a href="https://raw.githack.com/EltonCherrington/memctl-shop/main/site/index.html">memctl.sh</a>.
+</div>
+</main>
+
+<footer>Written by Elton Cherrington · MIT · plain text philosophy, minimal javascript — no analytics,
+no ads, not even a server. <a href="https://raw.githack.com/EltonCherrington/memctl-shop/main/site/index.html">memctl.sh</a></footer>
+</body>
+</html>
