@@ -68,23 +68,24 @@
         <li>Works with Claude Code, Codex, Cursor — any <code>CLAUDE.md</code> reader</li>
         <li>One-time payment, lifetime updates via GitHub</li>
       </ul>
-      <p style="color:#b9c0cc;font-size:14px">Send <strong>$1 USDC</strong> (Circle, on <strong>Base</strong>) to:</p>
+      <p style="color:#b9c0cc;font-size:14px">Free today. Send <strong>$1 USDC</strong> (Circle, on <strong>Base</strong>) for an on-chain receipt:</p>
       <div class="addr">
         <input id="wallet" readonly value="0x648bAa08901f1bEAB002Af57f1375F80Ec4F4893" onclick="this.select();document.execCommand('copy')">
-        <button onclick="verify()" id="verifyBtn">I've sent it — unlock</button>
+        <button onclick="verify()" id="verifyBtn">Check on-chain</button>
       </div>
-      <div id="status">Send the USDC, then hit unlock (or it auto-watches for you).</div>
+      <div id="status">Unlocked instantly (no wallet needed). Send USDC on Base if it's worth it — the page confirms on-chain.</div>
     </div>
   </div>
 
   <details open>
     <summary>How unlocking works (5 min total)</summary>
-    <p>1. Send exactly <strong>$1 USDC</strong> — the token contract on Base is
-    <code>0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913</code> (native Circle USDC). If your wallet shows
-    “USDbC”, that's the old bridged token — don't send it here.</p>
-    <p>2. Press <strong>I've sent it — unlock</strong>. The site reads the public Base chain for an inbound
-    transfer of ≥ $1.</p>
-    <p>3. On confirmation you get the download link instantly. No account, no email, no middleman.</p>
+    <p>1. The download is unlocked immediately below — no wallet required. Paying is optional (see why, next).</p>
+    <p>2. If you send <strong>$1 USDC</strong> — native Circle on <strong>Base</strong>,
+    contract <code>0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913</code> (if your wallet shows "USDbC",
+    that's the old bridged token — don't send it here) — the page confirms your receipt on-chain and
+    shows "Confirmed".</p>
+    <p>3. USDC just isn't for you? Then take it free and pay the value forward when it saves you an
+    hour. No account, no email, no middleman either way.</p>
   </details>
   <details>
     <summary>Why pay for memory templates when GitHub has free ones?</summary>
@@ -137,12 +138,13 @@
     b.disabled = true; s.className = ''; s.textContent = 'Reading public Base chain for your transfer…';
     try {
       const total = await paidTotal();
+      s.className = 'ok';
+      const link = '<a href="' + DL + '" style="color:#7fb0ff">download the Memory Pack</a> (zip)';
       if (total >= PRICE) {
         stopWatch();
-        s.className = 'ok';
-        s.innerHTML = 'Payment confirmed. Grab it here: <a href="' + DL + '" style="color:#7fb0ff">download the Memory Pack</a> (zip).';
+        s.innerHTML = 'Confirmed on-chain — thank you! Grab it here: ' + link + '.';
       } else {
-        s.className = 'bad'; s.textContent = 'No qualifying transfer yet (found $' + (Number(total) / 1e6).toFixed(2) + '). Check address, chain = Base, and amount ≥ $1, then click again.';
+        s.innerHTML = 'Unlocked (honor system). Tip optional — ' + link + '.';
         tryWatch();
       }
     } catch (e) {
