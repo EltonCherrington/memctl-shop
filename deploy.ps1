@@ -3,6 +3,9 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
+# storefront source of truth = _site/; repo keeps a served mirror in site/ (canonical URL below)
+$pageSrc = Join-Path $root '_site'
+Copy-Item (Join-Path $pageSrc '*.html') (Join-Path $root 'site') -Force
 $src = Join-Path $root 'templates'
 $dstDir = Join-Path $root "_site\d\$Token"
 New-Item -ItemType Directory -Force -Path $dstDir | Out-Null
