@@ -61,11 +61,11 @@
     <div class="card paid">
       <h2>The Micro Pack</h2>
       <p class="price"><span class="strike">$2</span> $1 USDC <span style="font-size:13px;color:#b794f4">launch price</span></p>
-      <p>The distilled starter: one cheat sheet + one minimal CLAUDE.md, ready in two minutes.</p>
+      <p>Curated, tested starter memory for your coding agent â€” drop-in, adapt in minutes.</p>
       <ul>
-        <li><code>cheat-sheet.md</code> â€” the conventions every agent should already know</li>
-        <li><code>base/CLAUDE.md</code> â€” minimal, sane, drop-in memory starter</li>
-        <li>Works with Claude Code, Codex, Cursor â€” any <code>CLAUDE.md</code> reader</li>
+        <li><code>base/CLAUDE.md</code> â€” project-identity, quality bar, handoff format</li>
+        <li><code>stacks/</code> â€” web, data, and API templates</li>
+        <li>Works with Claude Code, Codex, Cursor — any <code>CLAUDE.md</code> reader</li>
         <li>One-time payment, lifetime updates via GitHub</li>
       </ul>
       <p style="color:#b9c0cc;font-size:14px">Free today. Send <strong>$1 USDC</strong> (Circle, on <strong>Base</strong>) for an on-chain receipt:</p>
@@ -114,7 +114,7 @@
   const T0 = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
   const T2 = '0x000000000000000000000000' + WALLET.slice(2);
   const PRICE = 1000000n; // $5, 6 decimals
-  const RPCS = ['https://mainnet.base.org','https://1rpc.io/base','https://base-rpc.publicnode.com','https://rpc.ankr.com/base'];
+  const RPCS = ['https://mainnet.base.org','https://base.drpc.org','https://base.llamarpc.com','https://base-rpc.publicnode.com'];
   const DL = 'https://cdn.jsdelivr.net/gh/EltonCherrington/memctl-shop@main/pack/memctl-micro-pack-v1.zip';
   async function rpc(u, body) {
     const r = await fetch(u, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
