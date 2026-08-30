@@ -3,9 +3,11 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-# storefront source of truth = _site/; repo keeps a served mirror in site/ (canonical URL below)
+# storefront source of truth = _site/; mirrors: site/ (githack, human-visible) + docs/ (GitHub Pages, indexable)
 $pageSrc = Join-Path $root '_site'
 Copy-Item (Join-Path $pageSrc '*.html') (Join-Path $root 'site') -Force
+New-Item -ItemType Directory -Force -Path (Join-Path $root 'docs') | Out-Null
+Copy-Item (Join-Path $pageSrc '*.html') (Join-Path $root 'docs') -Force
 $src = Join-Path $root 'templates'
 $dstDir = Join-Path $root "_site\d\$Token"
 New-Item -ItemType Directory -Force -Path $dstDir | Out-Null
