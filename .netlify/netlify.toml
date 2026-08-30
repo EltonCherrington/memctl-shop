@@ -1,0 +1,30 @@
+plugins = []
+functionsDirectory = "C:\\Users\\Dovid L\\Documents\\Default Project\\memctl-shop\\functions"
+functionsDirectoryOrigin = "config-v1"
+headers = []
+redirects = []
+
+[functions]
+
+[functions."*"]
+
+[build]
+publish = "C:\\Users\\Dovid L\\Documents\\Default Project\\memctl-shop\\_site"
+publishOrigin = "config"
+commandOrigin = "config"
+command = "echo static-only"
+functions = "C:\\Users\\Dovid L\\Documents\\Default Project\\memctl-shop\\functions"
+
+[build.environment]
+
+[build.processing]
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]
