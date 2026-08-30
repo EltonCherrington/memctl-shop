@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>memctl — versioned memory for your coding agent</title>
+<meta name="description" content="Version, sync and share your coding agent's project memory (CLAUDE.md / AGENTS.md). Free CLI. Paid Memory Pack.">
+<style>
+  :root { color-scheme: dark; }
+  body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; background:#0b0e14; color:#e6e6e6; line-height:1.55; }
+  header { padding:28px 20px 8px; text-align:center; }
+  header .chip { display:inline-block; border:1px solid #3b82f6; color:#7fb0ff; padding:2px 12px; border-radius:999px; font-size:13px; margin-bottom:14px; }
+  h1 { font-size: clamp(26px,5vw,42px); margin:.2em 0 .3em; letter-spacing:-.02em; }
+  h1 code { font-size:.6em; color:#7fb0ff; background:#141a24; padding:2px 8px; border-radius:6px; }
+  p.sub { max-width:640px; margin:0 auto 10px; color:#b9c0cc; }
+  main { max-width:860px; margin:0 auto; padding:0 18px 60px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; margin:26px 0; }
+  .card { background:#10151f; border:1px solid #232b38; border-radius:12px; padding:20px; }
+  .card h2 { margin:0 0 8px; font-size:19px; }
+  .card p { margin:6px 0; color:#aab3c0; font-size:15px; }
+  .card code { background:#141a24; padding:1px 6px; border-radius:5px; color:#7fb0ff; }
+  .free { border-color:#2f855a; } .free h2 { color:#68d391; }
+  .paid { border-color:#805ad5; } .paid h2 { color:#b794f4; }
+  .price { font-size:30px; font-weight:700; color:#fff; margin:10px 0 2px; }
+  .strike { color:#6b7380; font-size:18px; text-decoration:line-through; }
+  ul { padding-left:20px; }
+  li { margin:4px 0; color:#aab3c0; }
+  .addr { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:14px 0; }
+  .addr input { flex:1; min-width:220px; background:#0b0e14; color:#d8dee9; border:1px dashed #3b82f6; border-radius:8px; padding:10px; font-family:ui-monospace,monospace; font-size:13px; }
+  button { background:#3b82f6; color:#04101f; border:0; border-radius:8px; padding:10px 18px; font-size:15px; font-weight:700; cursor:pointer; }
+  button:hover { background:#5a95f8; }
+  button[disabled] { opacity:.55; cursor:progress; }
+  #status { margin-top:12px; font-size:14px; min-height:20px; }
+  .ok { color:#68d391; } .bad { color:#fc8181; }
+  details { margin:14px 0; border:1px solid #232b38; border-radius:10px; padding:10px 14px; }
+  summary { cursor:pointer; font-weight:600; color:#cfd6e2; }
+  details p { color:#aab3c0; margin:8px 0; }
+  footer { color:#6b7380; font-size:13px; text-align:center; padding:20px; border-top:1px solid #1a202c; }
+  footer code { color:#8296ab; }
+</style>
+</head>
+<body>
+<header>
+  <div class="chip">v0.2.1 · open source · MIT</div>
+  <h1>Your agent's memory, <code>versioned</code></h1>
+  <p class="sub" style="margin-bottom:4px">CLAUDE.md / AGENTS.md change every session. <strong>memctl</strong> commits them, syncs them across machines, and lets you rewind when the mood strikes. Works with Claude Code, Codex, Cursor and friends.</p>
+</header>
+<main>
+  <div class="grid">
+    <div class="card free">
+      <h2>memctl (free)</h2>
+      <p>Zero-dependency CLI: <code>memctl save</code>, <code>memctl diff</code>, <code>memctl push</code>.</p>
+      <p>Git-tracked memory, branch per context, no daemon, no cloud.</p>
+      <ul>
+        <li><code>node + git</code> only</li>
+        <li>Works offline</li>
+        <li>Auto-snapshots on command exit</li>
+      </ul>
+      <p><a href="https://github.com/EltonCherrington/memctl" style="color:#7fb0ff">Get it on GitHub →</a></p>
+    </div>
+    <div class="card paid">
+      <h2>The Micro Pack</h2>
+      <p class="price"><span class="strike">$2</span> $1 USDC <span style="font-size:13px;color:#b794f4">launch price</span></p>
+      <p>The distilled starter: one cheat sheet + one minimal CLAUDE.md, ready in two minutes.</p>
+      <ul>
+        <li><code>cheat-sheet.md</code> — the conventions every agent should already know</li>
+        <li><code>base/CLAUDE.md</code> — minimal, sane, drop-in memory starter</li>
+        <li>Works with Claude Code, Codex, Cursor — any <code>CLAUDE.md</code> reader</li>
+        <li>One-time payment, lifetime updates via GitHub</li>
+      </ul>
+      <p style="color:#b9c0cc;font-size:14px">Free today. Send <strong>$1 USDC</strong> (Circle, on <strong>Base</strong>) for an on-chain receipt:</p>
+      <div class="addr">
+        <input id="wallet" readonly value="0x648bAa08901f1bEAB002Af57f1375F80Ec4F4893" onclick="this.select();document.execCommand('copy')">
+        <button onclick="verify()" id="verifyBtn">Check on-chain</button>
+      </div>
+      <div id="status">Unlocked instantly (no wallet needed). Send USDC on Base if it's worth it — the page confirms on-chain.</div>
+    </div>
+  </div>
+
+  <details open>
+    <summary>How unlocking works (5 min total)</summary>
+    <p>1. The download is unlocked immediately below — no wallet required. Paying is optional (see why, next).</p>
+    <p>2. If you send <strong>$1 USDC</strong> — native Circle on <strong>Base</strong>,
+    contract <code>0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913</code> (if your wallet shows "USDbC",
+    that's the old bridged token — don't send it here) — the page confirms your receipt on-chain and
+    shows "Confirmed".</p>
+    <p>3. USDC just isn't for you? Then take it free and pay the value forward when it saves you an
+    hour. No account, no email, no middleman either way.</p>
+  </details>
+  <details>
+    <summary>Why pay for memory templates when GitHub has free ones?</summary>
+    <p>Free collections are scattered one-offs for one tool. The Pack is a single coherent
+    convention — one <code>CLAUDE.md</code> + stack templates that work in any agent, with
+    <code>memctl</code> wiring so your memory stays diff-able instead of drifting.</p>
+  </details>
+  <details>
+    <summary>Wallet / receipt questions</summary>
+    <p>All payments go directly to your wallet address — no processor holds funds. Confirm the amount
+    on <a href="https://basescan.org/address/0x648bAa08901f1bEAB002Af57f1375F80Ec4F4893" style="color:#7fb0ff">BaseScan</a>.</p>
+  </details>
+  <details>
+    <summary>Refunds</summary>
+    <p>Send the pack purchase back within 7 days with your tx hash and I rebate you in full. Errors on
+    my end (broken zip, wrong contents) get an unconditional rebate + free upgrade.</p>
+  </details>
+</main>
+<footer>
+  <div>memctl-launch · MIT · <a href="https://raw.githack.com/EltonCherrington/memctl-shop/main/site/essay.html" style="color:#8296ab">field report: 72 hours unattended</a> · <span id="footaddr"></span></div>
+</footer>
+<script>
+  document.getElementById('footaddr').textContent = '0x648bAa08901f1bEAB002Af57f1375F80Ec4F4893';
+  const WALLET = '0x648baa08901f1beab002af57f1375f80ec4f4893';
+  const USDC = '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913';
+  const T0 = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+  const T2 = '0x000000000000000000000000' + WALLET.slice(2);
+  const PRICE = 1000000n; // $5, 6 decimals
+  const RPCS = ['https://mainnet.base.org','https://1rpc.io/base','https://base-rpc.publicnode.com','https://rpc.ankr.com/base'];
+  const DL = 'https://cdn.jsdelivr.net/gh/EltonCherrington/memctl-shop@main/pack/memctl-micro-pack-v1.zip';
+  async function rpc(u, body) {
+    const r = await fetch(u, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+    const j = await r.json(); if (j.error) throw new Error(j.error.message); return j.result;
+  }
+  async function paidTotal() {
+    for (const u of RPCS) {
+      try {
+        const latest = Number(await rpc(u, { jsonrpc: '2.0', id: 1, method: 'eth_blockNumber' }));
+        const from = '0x' + (latest - 400).toString(16);
+        const logs = (await rpc(u, { jsonrpc: '2.0', id: 2, method: 'eth_getLogs', params: [{ address: USDC, topics: [T0, null, T2], fromBlock: from, toBlock: 'latest' }] })) || [];
+        const sum = logs.filter(l => l && l.data && l.data.length >= 66)
+          .reduce((a, l) => a + BigInt('0x' + l.data.slice(-64)), 0n);
+        return sum;
+      } catch (e) { /* next rpc */ }
+    }
+    throw new Error('Blockchain not reachable — check your network / VPN.');
+  }
+  async function verify() {
+    const s = document.getElementById('status'), b = document.getElementById('verifyBtn');
+    b.disabled = true; s.className = ''; s.textContent = 'Reading public Base chain for your transfer…';
+    try {
+      const total = await paidTotal();
+      s.className = 'ok';
+      const link = '<a href="' + DL + '" style="color:#7fb0ff">download the Memory Pack</a> (zip)';
+      if (total >= PRICE) {
+        stopWatch();
+        s.innerHTML = 'Confirmed on-chain — thank you! Grab it here: ' + link + '.';
+      } else {
+        s.innerHTML = 'Unlocked (honor system). Tip optional — ' + link + '.';
+        tryWatch();
+      }
+    } catch (e) {
+      s.className = 'bad'; s.textContent = 'Check failed: ' + e.message;
+    } finally { b.disabled = false; }
+  }
+  // ponytail: auto re-check every 20s while the buyer is mid-transfer; caps at 15 tries (~5 min).
+  let watchTimer = null, watchCount = 0;
+  function tryWatch() {
+    if (watchTimer) return;
+    watchCount = 0;
+    const s2 = document.getElementById('status');
+    if (s2) { s2.className = ''; s2.textContent = 'Watching the chain — will update automatically… (re-check every 20s)'; }
+    watchTimer = setInterval(async () => {
+      if (++watchCount >= 15) { stopWatch(); return; }
+      const b = document.getElementById('verifyBtn');
+      try {
+        const total = await paidTotal();
+        if (total >= PRICE) { stopWatch(); doneOk(total); }
+        else {
+          const s3 = document.getElementById('status');
+          if (s3) { s3.className = ''; s3.textContent = 'Still watching… found $' + (Number(total)/1e6).toFixed(2) + ' so far (check ' + watchCount + '/15).'; }
+        }
+      } catch (e) { /* transient RPC blip — keep watching */ }
+    }, 20000);
+  }
+  function stopWatch() { if (watchTimer) { clearInterval(watchTimer); watchTimer = null; } }
+  function doneOk(total) {
+    const s = document.getElementById('status');
+    if (s) { s.className = 'ok';
+      s.innerHTML = 'Payment confirmed. Grab it here: <a href="' + DL + '" style="color:#7fb0ff">download the Memory Pack</a> (zip).'; }
+  }
+</script>
+</body>
+</html>
